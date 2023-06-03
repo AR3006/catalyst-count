@@ -1,0 +1,48 @@
+{% include 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="col-md-5 mx-auto">  
+        <div class="card card-body">  
+            <h1>Upload File</h1>
+            <form id="uploadForm" action="on_upload_file" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="file">
+                <button id="uploadButton" type="submit">Upload</button>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="progress" class="progress">
+    <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: 0%" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+
+{% endblock %}
+
+<script>
+    function updateProgressBar() {
+        var progressBar = document.querySelector('.progress-bar');
+        var interval = setInterval(function() {
+            // Make an AJAX request to get the progress value from the server
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/get_progress', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var progress = parseInt(xhr.responseText);
+                    progressBar.style.width = progress + '%';
+                    progressBar.setAttribute('aria-valuenow', progress);
+                    progressBar.innerText = progress + '%';
+                    
+                    // If progress reaches 100, stop updating the progress bar
+                    if (progress === 100) {
+                        clearInterval(interval);
+                    }
+                }
+            };
+            xhr.send();
+        }, 1000); // Update every second (1000 milliseconds)
+    }
+
+    // Start updating the progress bar when the page is loaded
+    window.addEventListener('load', updateProgressBar);
+</script>
